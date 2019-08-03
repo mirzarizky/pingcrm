@@ -2,6 +2,7 @@
 
 namespace App\Providers;
 
+use Illuminate\Support\Facades\URL;
 use Inertia\Inertia;
 use Carbon\CarbonImmutable;
 use Illuminate\Support\Collection;
@@ -18,11 +19,19 @@ class AppServiceProvider extends ServiceProvider
 {
     public function boot()
     {
+        if(env('REDIRECT_HTTPS')) {
+            URL::forceScheme('https'); // for heroku deployment
+        }
+
         Date::use(CarbonImmutable::class);
     }
 
     public function register()
     {
+        if(env('REDIRECT_HTTPS')) {
+            $this->app['request']->server->set('HTTPS', true); // for heroku deployment
+        }
+
         Inertia::version(function () {
             return md5_file(public_path('mix-manifest.json'));
         });
